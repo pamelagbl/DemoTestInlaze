@@ -1,3 +1,4 @@
+import re
 import time
 
 from selenium.webdriver import ActionChains
@@ -58,6 +59,20 @@ class LoginPage:
         return WebDriverWait(self.driver, 20).until(
             EC.visibility_of_element_located(self.message)
         ).text
+
+    def is_valid_login_password(self, password):
+        if len(password) < 8:
+            return False, "La contraseña debe tener al menos 8 caracteres."
+        if not re.search(r"[A-Z]", password):
+            return False, "La contraseña debe contener al menos una letra mayúscula."
+        if not re.search(r"[a-z]", password):
+            return False, "Password must contain at least one lowercase letter."
+        if not re.search(r"\d", password):
+            return False, "La contraseña debe contener al menos un dígito."
+        if not re.search(r"[!@#\$%\^&\*\(\)_\+\-=\[\]\{\};':\"\|,.<>\/?]", password):
+            return False, "La contraseña debe contener al menos un carácter especial."
+        return True, ""
+
 
     def invalid_email(self):
         return WebDriverWait(self.driver, 20).until(

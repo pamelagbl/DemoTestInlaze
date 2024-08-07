@@ -10,6 +10,8 @@ from selenium.webdriver.support.wait import WebDriverWait
 class RegisterUserPage:
     def __init__(self, driver):
         self.driver = driver
+        self.password = None
+        self.confirm_password = None
         self.fullname_field = (By.ID, "full-name")
         self.email_field = (By.ID, "email")
         self.password_field = (By.ID, "password")
@@ -18,6 +20,7 @@ class RegisterUserPage:
         self.success_registration = (By.CSS_SELECTOR, ".ml-3.text-sm.font-normal")
         self.error_message = "Email ya registrado"
         self.error_message_email = "El campo email no cumple con el formato test@dominio.com"
+        self.txt_error = (By.CSS_SELECTOR, ".label-text-alt.text-error")
 
     def enter_full_name(self, fullname):
         element = WebDriverWait(self.driver, 10).until(
@@ -32,22 +35,26 @@ class RegisterUserPage:
         element.send_keys(email)
 
     def enter_password_field(self, password):
-
         element = WebDriverWait(self.driver, 20).until(
-            EC.element_to_be_clickable(self.password_field)
+            EC.element_to_be_clickable((By.ID, "password"))
         )
+
         self.driver.execute_script("arguments[0].scrollIntoView(true);", element)
         actions = ActionChains(self.driver)
         actions.move_to_element(element).click().send_keys(password).perform()
+        self.password = password
 
     def enter_confirm_password_field(self, confirm_password):
-
         element = WebDriverWait(self.driver, 20).until(
             EC.element_to_be_clickable(self.repeat_password_field)
         )
         self.driver.execute_script("arguments[0].scrollIntoView(true);", element)
         actions = ActionChains(self.driver)
         actions.move_to_element(element).click().send_keys(confirm_password).perform()
+        self.confirm_password = confirm_password
+
+    def passwords_match(self):
+        return self.password == self.confirm_password
 
     def click_login(self):
         WebDriverWait(self.driver, 20).until(
@@ -70,6 +77,12 @@ class RegisterUserPage:
             EC.visibility_of_element_located(self.error_message_email)
         ).text
 
+    def get_error_message(self):
+        element = WebDriverWait(self.driver, 20).until(
+            EC.presence_of_element_located(self.txt_error)
+        )
+        return element.text
+
     def login_button_disabled(self):
         login_button_element = WebDriverWait(self.driver, 20).until(
             EC.visibility_of_element_located(self.login_button)
@@ -90,7 +103,7 @@ class RegisterUserPage:
         if not re.search(r"[A-Z]", password):
             return False, "La contraseña debe contener al menos una letra mayúscula."
         if not re.search(r"[a-z]", password):
-            return False, "Password must contain at least one lowercase letter."
+            return False, "La contraseña debe contener al menos una letra minúscula."
         if not re.search(r"\d", password):
             return False, "La contraseña debe contener al menos un dígito."
         if not re.search(r"[!@#\$%\^&\*\(\)_\+\-=\[\]\{\};':\"\|,.<>\/?]", password):

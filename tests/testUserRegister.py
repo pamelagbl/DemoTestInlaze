@@ -85,16 +85,16 @@ class TestUserRegister(unittest.TestCase):
     def test_user_registration_validate_password(self):
         base_page_user_register = RegisterUserPage(self.driver)
         base_page_user_register.enter_full_name("Jon Snow")
-        base_page_user_register.enter_email('test@example.com')
-        password = "Sr0"
-        confirm_password = "Sr0"
+        base_page_user_register.enter_email('test9@example.com')
+        password = "SRT2024!"
+        confirm_password = "SRT2024!"
         base_page_user_register.enter_password_field(password)
         base_page_user_register.enter_confirm_password_field(confirm_password)
 
         is_valid_password, message_password = base_page_user_register.validate_password_format(password)
         print(f"Resultado de la validación para la contraseña '{password}': {message_password}")
 
-        self.assertTrue(is_valid_password, "El campo password no está cumpliendo el criterio de aceptación.")
+        self.assertTrue(is_valid_password, f"No se puede registrar usuario por: {message_password}")
 
         base_page_user_register.click_login()
 
@@ -152,6 +152,25 @@ class TestUserRegister(unittest.TestCase):
         self.assertFalse(is_register_button_enabled, "El botón de registro no debería estar habilitado para un nombre "
                                                      "inválido.")
         base_page_user_register.click_login()
+
+    def test_user_registration_password_coincidence(self):
+        base_page_user_register = RegisterUserPage(self.driver)
+        base_page_user_register.enter_full_name("Jon Snow")
+        base_page_user_register.enter_email('test@example.com')
+
+        password = 'Test-2024'
+        confirm_password = 'Test-2025'
+        base_page_user_register.enter_password_field(password)
+        base_page_user_register.enter_confirm_password_field(confirm_password)
+
+        expected_message = "Passwords don't match"
+
+        with self.subTest(msg="Validating password mismatch message"):
+            self.assertTrue(base_page_user_register.passwords_match(), "Las contraseñas no coinciden.")
+
+        with self.subTest(msg="Validating some other condition"):
+            actual_message = base_page_user_register.get_error_message()
+            self.assertEqual(expected_message, actual_message, "El mensaje de error no coincide con el esperado.")
 
     def tearDown(self):
         time.sleep(5)
