@@ -37,7 +37,7 @@ class TestLogin(unittest.TestCase):
         print(f"Se ha redirigido con éxito al usuario a la página correspondiente")
 
         user_name = base_page_user_login.get_user_login()
-        print("El nombre de usuario obtenido es: {user_name}")
+        print(f"El nombre de usuario obtenido es: {user_name}")
         self.assertEqual(user_name, expected_name, f"Se espera que el nombre de usuario sea: {expected_name} pero se "
                                                    f"recibió: {user_name}")
 
@@ -64,11 +64,46 @@ class TestLogin(unittest.TestCase):
         base_page_user_login = LoginPage(self.driver)
         base_page_user_login.enter_email('')
         base_page_user_login.enter_password('')
-        base_page_user_login.click_login()
+        #base_page_user_login.click_login()
 
-        self.assertFalse(base_page_user_login.button_disabled(), "El botón de inicio de sesión debería estar "
-                                                                 "deshabilitado cuando los campos están vacíos.")
-        print("Prueba")
+        button_disabled = base_page_user_login.login_button_disabled()
+        print(f"El botón de inicio de sesión tiene el elemento disabled: {button_disabled}")
+        self.assertTrue(button_disabled, "El botón de inicio de sesión debería estar "
+                                         "deshabilitado cuando los campos están vacíos.")
+
+    def test_incorrect_password(self):
+        base_page_user_login = LoginPage(self.driver)
+        base_page_user_login.enter_email('pamela.gbrito7@gmail.com')
+        base_page_user_login.enter_password('Hola2024')
+        base_page_user_login.click_login()
+        message = base_page_user_login.invalid_password()
+        print(f"El mensaje esperado es: {message}")
+
+        self.assertIn("Password doesn't match", message)
+
+    def test_incorrect_email(self):
+        base_page_user_login = LoginPage(self.driver)
+        base_page_user_login.enter_email('testexample@gmail.com')
+        base_page_user_login.enter_password('Test2024')
+        base_page_user_login.click_login()
+        message = base_page_user_login.invalid_email()
+        print(f"El mensaje esperado es: {message}")
+
+        self.assertIn("User not found", message)
+
+    def test_validate_password_less_than_eigth_characters(self):
+        base_page_user_login = LoginPage(self.driver)
+        base_page_user_login.enter_email('pamela.gbrito7@gmail.com')
+        base_page_user_login.enter_password('Test')
+
+        button_password = base_page_user_login.login_button_disabled()
+        print(f"El botón de inicio de sesión tiene el elemento disabled: {button_password}")
+        self.assertTrue(button_password, "El botón de inicio de sesión debería estar "
+                                         "deshabilitado cuando el campo contraseña tiene "
+                                         "menos de 5 caracteres.")
+        print("No se puede iniciar sesión ya que el campo password tiene menos de 5 caracteres")
+
+        #el campo password puede tener 4 caracteres si se incluye mayus y numero, pero da mensaje de error cuando se intenta iniciar sesión
 
     def tearDown(self):
         time.sleep(5)

@@ -14,7 +14,9 @@ class LoginPage:
         self.login_button = (By.XPATH, "//button[@type='submit']")
         self.show_hide_button = (By.CLASS_NAME, 'fa-eye')
         self.label = (By.XPATH, "//div[@class='flex gap-4 items-center']//h2[@class='font-bold']")
-        self.button_disabled = (By.CSS_SELECTOR, ".btn.btn-primary")
+        self.button_disabled = (By.CSS_SELECTOR, "button[type='submit']")
+        self.message = (By.XPATH, "//div[@class='ml-3 text-sm font-normal']")
+        self.message_email = (By.XPATH, "//div[normalize-space()='User not found']")
 
     def enter_email(self, email):
         element = WebDriverWait(self.driver, 10).until(
@@ -36,15 +38,15 @@ class LoginPage:
         actions.move_to_element(element).click().send_keys(password).perform()
 
     def click_login(self):
-        WebDriverWait(self.driver, 10).until(
+        WebDriverWait(self.driver, 20).until(
             EC.element_to_be_clickable(self.login_button)
         ).click()
 
-    def button_disabled(self):
+    def login_button_disabled(self):
         login_button_element = WebDriverWait(self.driver, 20).until(
-            EC.visibility_of_element_located(self.button_disabled)
+            EC.visibility_of_element_located(self.login_button)
         )
-        return login_button_element.is_enabled()
+        return not login_button_element.is_enabled()
 
     def get_user_login(self):
         user_name_element = WebDriverWait(self.driver, 10).until(
@@ -52,4 +54,12 @@ class LoginPage:
         )
         return user_name_element.text
 
+    def invalid_password(self):
+        return WebDriverWait(self.driver, 20).until(
+            EC.visibility_of_element_located(self.message)
+        ).text
 
+    def invalid_email(self):
+        return WebDriverWait(self.driver, 20).until(
+            EC.visibility_of_element_located(self.message)
+        ).text
